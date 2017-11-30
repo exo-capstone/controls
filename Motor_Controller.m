@@ -82,7 +82,7 @@ dist(1:floor(numel(t)/2)) = 0.5;    % provides 2 different disturbances
 
 %% Disturbance Observer
 wn = 293.3711;
-Q = tf([1],[1/wc^2, 1.4142/wc, 1]);
+Q = tf([1],[1/wn^2, 1.4142/wn, 1]);
 
 BL = Q;
 BL.u = 'fr';
