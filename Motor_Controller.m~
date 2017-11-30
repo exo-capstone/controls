@@ -81,7 +81,7 @@ dist = ones(numel(t),1);
 dist(1:floor(numel(t)/2)) = 0.5;    % provides 2 different disturbances
 
 %% Disturbance Observer
-wn = 293.3711;
+wc = 293.3711;
 Q = tf([1],[1/wc^2, 1.4142/wc, 1]);
 
 BL = Q;
@@ -116,10 +116,13 @@ xlabel('Time');
 
 % Simulate Controller with given inputs
 Fd = zeros(numel(t),1);
+
 Fk = lsim(SYS, [Fd,noise, dist], t);
 
 figure
 plot(t, Fk, 'LineWidth', 2);
+
+% step(SYS)
 
 
 
