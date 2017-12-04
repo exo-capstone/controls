@@ -1,14 +1,16 @@
 clear all; close all; clc;
 load('right_knee_open_loop_exp_chirp.mat');
 input = right_knee_open_loop_exp_chirp.input;
-output = -1*(right_knee_open_loop_exp_chirp.output - 4.7);
+output = right_knee_open_loop_exp_chirp.output;
+
+% Centers output signal to zero
+output = output - output(1);
 
 % Spring constant = 549360 N/m
 % Encoder angle to spring deflection= 0.000027707 m/degrees
-output = output * 0.000027707 * 549360; % Force in N
-
-% % Centers output signal to zero
-% output = output - output(1);
+% F = -kx
+k = 549360; 
+output = -output * 0.000027707 * k;
 
 % Sampling frequency Fs = 1 kHz
 Fs = 1000;
@@ -34,43 +36,28 @@ xlabel('Time (s)');
 xlim([0 t(end)]);
 saveas(f1,'input_output_data.png');
 
+data = iddata(output,input,Ts);
 % Number of poles
 np = 2;
 % Number of zeros
 nz = 0;
 % Estimates transfer function
-data = iddata(output,input,Ts);
-sys = tfest(data,np,nz)
-% Get coefficients for estimated transfer function
-[num,den] = tfdata(sys);
-% Percentage of fit of model with data
-% fit = sys.Report.Fit.FitPercent;
 
-% % Brute force search for optimal number of zeros and poles
-% n = 10;
-% np_test = 0;
-% np = 0;
-% nz = 0;
-% fit = 0;
-% for np_test = 1:n
-%     for nz_test = 0:np_test-1
-%         [np_test, nz_test]
-%         sys_test = tfest(data,np_test,nz_test);
-%         fit_test = sys_test.Report.Fit.FitPercent;
-%         if fit_test > fit
-%             np = np_test;
-%             nz = nz_test;
-%             sys = sys_test;
-%         end
-%     end
-% end
+SEA = tfest(data,np,nz)
+% Get coefficients for estimated transfer function
+num = SEA.Numerator;
+den = SEA.Denominator;
+mk = k / den(3);
+b_eff = mk * den(2);
+beta = (num * mk) / k;
+save('SEA.mat', 'SEA','b_eff', 'beta', 'k', 'mk');
 
 % Define frequency vector
 f = (0:N-1)*(Fs/N);
 w = 2*pi*f;
 
 % Obtain bode plot of model
-[mag,phase,wout] = bode(sys,w);
+[mag,phase,wout] = bode(SEA,w);
 mag = reshape(mag,[N,1]);
 phase = reshape(phase,[N,1]);
 
@@ -81,8 +68,7 @@ h_data = outputFFT ./ inputFFT;
 mag_data = abs(h_data);
 phase_data = angle(h_data) * (180/pi);
 
-
-
+%% Plotting
 f2 = figure;
 subplot(2,1,1)
 semilogx(f, mag2db(mag_data));
@@ -91,8 +77,10 @@ hold on;
 semilogx(f,mag2db(mag));
 ylabel('Magnitude (dB)');
 xlabel('Frequency (Hz)');
-legend('Data','Model');
-xlim([0 f(end)]);
+text_str = {['m_k = ', num2str(mk)],['b_{eff} = ', num2str(b_eff)],...
+    ['\beta = ', num2str(beta)], ['k = ', num2str(k)]};
+text(0.05, 0, text_str);
+xlim([0 100]);
 
 subplot(2,1,2)
 semilogx(f, phase_data);
@@ -101,8 +89,5 @@ semilogx(f,phase);
 ylabel('Phase (deg)');
 xlabel('Frequency (Hz)');
 legend('Data','Model');
-xlim([0 f(end)]);
+xlim([0 100]);
 saveas(f2,'system_ID.png');
-
-clear f1 f2
-save('systemid.mat');

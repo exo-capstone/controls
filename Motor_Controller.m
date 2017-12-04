@@ -1,37 +1,29 @@
 clear all; clc;
-load('systemid.mat');
-%% Measured parameters
-% m = 256;    % kg
-% b = 1250;   % N*s/m
-k = 549360; % N/m
-mk = 269.82;
-beff = 1196.8508;
-% N = 300;
-Beta = 825.6288;
+load('SEA.mat');
 
 % % UT-SEA force control parameters
 % kp = 0.05;  % A/N
 % f_kd = 100; % Hz
 % CL_damp_ratio = 0.9;    % no units
 % f_q = 40;   % Hz
-% Beta = 219; % N/A
+% beta = 219; % N/A
 % mk = 360;   % kg
-% beff = 2200;    % Ns/m
+% b_eff = 2200;    % Ns/m
 % k = 350000; % N/m
-% kd = (2*CL_damp_ratio*sqrt(mk*k*(1+Beta*kp))-beff)/(k*Beta);    %8.825e-04
+% kd = (2*CL_damp_ratio*sqrt(mk*k*(1+beta*kp))-b_eff)/(k*beta);    %8.825e-04
 %% Chosen parameters
 CL_damp_ratio = .9;   % no units
 kp = 0.05;  % A/N
-kd = (2*CL_damp_ratio*sqrt(mk*k*(1+Beta*kp))-beff)/(k*Beta);
+kd = (2*CL_damp_ratio*sqrt(mk*k*(1+beta*kp))-b_eff)/(k*beta);
 
 % Mhat = mk;
-% Bhat = beff + k*Beta*kd;
-% Khat = k*(1+Beta*kp);
+% Bhat = b_eff + k*beta*kd;
+% Khat = k*(1+beta*kp);
 % damping_ratio = Bhat/(2*sqrt(Mhat*Khat));
 %% Force Control (Ideal)
 % Open Loop
 % Plant
-P=sys;
+P = SEA;
 P.u = 'i';
 P.y = 'fk';
 % Controller
@@ -39,7 +31,7 @@ PD = tf([kd, kp],[1]);
 PD.u = 'e';
 PD.y = 'u';
 % For feed forward
-B = tf([1/Beta],[1]);
+B = tf([1/beta],[1]);
 B.u = 'fr';
 B.y = 'frb';
 
@@ -58,6 +50,7 @@ Gol = tf(connect(P,PD,B,S1,S2, inp, outp));
 % Closed Loop
 S1_cl = sumblk('e=fr-fk');
 Pc = tf(connect(P,PD,B,S1_cl ,S2, inp, outp));
+Pc_check = tf([k*beta*kd, k*(1 + beta*kp)], [mk, b_eff + k*beta*kd, k*(1 + beta*kp)]);
 % figure
 % bode(Pc)
 % figure
