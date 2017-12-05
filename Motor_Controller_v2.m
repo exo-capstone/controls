@@ -23,22 +23,33 @@ kd = (2*CL_damp_ratio*sqrt(mk*k*(1+beta*kp))-b_eff)/(k*beta);
 P = SEA;
 % Controller
 PD = tf([kd, kp],[1]);
-H = integralboost(293);
+H = integralboost(293); % chosen b/c of Plant's natural frequency
 C = PD*H;
 % Feedforward
 B = tf([1/beta],[1]);
 
 [SYS, Gol, Pc, Pc_nd] = getModelTFs(P,C,B);
-[SYS_2, Gol_2, Pc_2, Pc_nd_2] = getModelTFs(P,PD,B);
-
+[SYS_orig, Gol_orig, Pc_orig, Pc_nd_orig] = getModelTFs(P,PD,B);
 
 %% Open Loop Analysis
-sens_func = feedback([1],[Gol]);
-comp_sens_func = feedback([Gol],[1]);
+S = feedback([1],[Gol]);
+T = feedback([Gol],[1]);
 
-functions = {Gol; sens_func; comp_sens_func};
-bodemag(functions{:})
-legend('L', 'S', 'T')
+figure
+subplot(2,1,1)
+bodemag(Gol,'-b', S,'-g', T,'-r')
+
+
+S_orig = feedback([1],[Gol_orig]);
+T_orig = feedback([Gol_orig],[1]);
+
+subplot(2,1,2)
+bodemag(Gol_orig,'b-', S_orig, 'g-',T_orig,'r-')
+legend('new L', 'new S', 'new T','original L', 'original S', 'original T')
+
+% Open loop characteristics
+c1_chars=assessL(Gol)
+c2_chars=assessL(Gol_orig)
 
 %% Create Noise/Disturbance
 % Create discrete time steps to apply noise and disturbance
@@ -51,19 +62,28 @@ dist = ones(numel(t),1);
 dist(1:floor(numel(t)/2)) = 0.5;    % provides 2 different disturbances
 
 %% Closed Loop w/DOB Analysis
-% Plot noise and disturbance for reference
-figure
-plot(t, noise,'r', t, dist, 'b');
-% hold on
-legend('Noise', 'Disturbance');
-xlabel('Time');
 
 % Simulate Controller with given inputs
 Fd = zeros(numel(t),1);
+
+% Plot input, noise and disturbance for reference
+figure
+plot(t, Fd, 'k', t, noise,'r', t, dist, 'g');
+legend('Input','Noise', 'Disturbance');
+xlabel('Time');
+
+
 Fk = lsim(SYS, [Fd,noise, dist], t);
+Fk_orig = lsim(SYS_orig, [Fd,noise,dist],t);
 
 figure
+subplot(2,1,1)
 plot(t, Fk, 'LineWidth', 2);
+title('Tested Controller')
+
+subplot(2,1,2)
+plot(t, Fk_orig, 'LineWidth',2);
+title('Original PD Controller')
 
 
 
