@@ -38,15 +38,16 @@ T = feedback([Gol],[1]);
 figure
 subplot(2,1,1)
 bodemag(Gol,'-b', S,'-g', T,'-r')
-
+legend('new L', 'new S', 'new T')
+title('Test Controller Bode Diagram')
 
 S_orig = feedback([1],[Gol_orig]);
 T_orig = feedback([Gol_orig],[1]);
 
 subplot(2,1,2)
 bodemag(Gol_orig,'b-', S_orig, 'g-',T_orig,'r-')
-legend('new L', 'new S', 'new T','original L', 'original S', 'original T')
-
+legend('original L', 'original S', 'original T')
+title('Original Controller Bode Diagram')
 % Open loop characteristics
 c1_chars=assessL(Gol)
 c2_chars=assessL(Gol_orig)
@@ -79,7 +80,7 @@ Fk_orig = lsim(SYS_orig, [Fd,noise,dist],t);
 figure
 subplot(2,1,1)
 plot(t, Fk, 'LineWidth', 2);
-title('Tested Controller')
+title('Test Controller')
 
 subplot(2,1,2)
 plot(t, Fk_orig, 'LineWidth',2);
