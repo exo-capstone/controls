@@ -1,4 +1,4 @@
-function [ SYS, Gol, Pc, Pc_nd ] = getModelTFs(P, C, B)
+function [ SYS, L, Gol, Pc, Pc_nd ] = getModelTFs(P, C, B)
 % Uses model outlined in Nick Paine's thesis (below) to return the open 
 % loop, closed loop (ideal), closed loop (w/noise and dist), and closed 
 % loop w/DOB transfer functions given plant, controller, and feedforward TFs
@@ -34,7 +34,10 @@ S2 = sumblk('i=u+frb');
 inp = {'fr'};
 outp = {'fk'};
 
-% Open loop transfer function
+% Open loop transfer function without feed forward (just P and C)
+L = P*C;
+
+% Open loop transfer function with feed forward
 Gol = tf(connect(P,C,B,S1,S2, inp, outp));
 
 %% Closed Loop

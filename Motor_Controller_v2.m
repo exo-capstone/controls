@@ -26,31 +26,32 @@ PD = tf([kd, kp],[1]);
 H = integralboost(293); % chosen b/c of Plant's natural frequency
 C = PD*H;
 % Feedforward
-B = tf([1/beta],[1]);
+%B = tf([1/beta],[1]);
+B = tf([0],[1]);
 
-[SYS, Gol, Pc, Pc_nd] = getModelTFs(P,C,B);
-[SYS_orig, Gol_orig, Pc_orig, Pc_nd_orig] = getModelTFs(P,PD,B);
+[SYS, L, Gol, Pc, Pc_nd] = getModelTFs(P,C,B);
+[SYS_orig, L_orig, Gol_orig, Pc_orig, Pc_nd_orig] = getModelTFs(P,PD,B);
 
 %% Open Loop Analysis
-S = feedback([1],[Gol]);
-T = feedback([Gol],[1]);
+S = feedback([1],[L]);
+T = feedback([L],[1]);
 
 figure
 subplot(2,1,1)
-bodemag(Gol,'-b', S,'-g', T,'-r')
+bodemag(L,'-b', S,'-g', T,'-r')
 legend('new L', 'new S', 'new T')
 title('Test Controller Bode Diagram')
 
-S_orig = feedback([1],[Gol_orig]);
-T_orig = feedback([Gol_orig],[1]);
+S_orig = feedback([1],[L_orig]);
+T_orig = feedback([L_orig],[1]);
 
 subplot(2,1,2)
-bodemag(Gol_orig,'b-', S_orig, 'g-',T_orig,'r-')
+bodemag(L_orig,'b-', S_orig, 'g-',T_orig,'r-')
 legend('original L', 'original S', 'original T')
 title('Original Controller Bode Diagram')
 % Open loop characteristics
-c1_chars=assessL(Gol)
-c2_chars=assessL(Gol_orig)
+c1_chars=assessL(L)
+c2_chars=assessL(L_orig)
 
 %% Create Noise/Disturbance
 % Create discrete time steps to apply noise and disturbance
