@@ -69,10 +69,10 @@ dist(1:floor(numel(t)/2)) = 0.5;    % provides 2 different disturbances
 Fd = zeros(numel(t),1);
 
 % Plot input, noise and disturbance for reference
-figure
-plot(t, Fd, 'k', t, noise,'r', t, dist, 'g');
-legend('Input','Noise', 'Disturbance');
-xlabel('Time');
+% figure
+% plot(t, Fd, 'k', t, noise,'r', t, dist, 'g');
+% legend('Input','Noise', 'Disturbance');
+% xlabel('Time');
 
 
 Fk = lsim(SYS, [Fd,noise, dist], t);
@@ -87,7 +87,6 @@ subplot(2,1,2)
 plot(t, Fk_orig, 'LineWidth',2);
 title('Original PD Controller')
 
-
-
-
-
+%% Convert from continuous to discrete time
+Ts = 1/1000; % assume sampling rate of 1 kHz
+sys_discrete = c2d(SYS(1,1),Ts);
