@@ -32,7 +32,7 @@ B.y = 'frb';
 S1 = sumblk('e=fr');
 S2 = sumblk('i=u+frb');
 inp = {'fr'};
-outp = {'fk'};
+outp = {'fk';'i'};
 
 % Open loop transfer function without feed forward (just P and C)
 L = P*C;
@@ -62,7 +62,7 @@ Q = tf([1],[1/wn^2, 1.4142/wn, 1]);
 BL = Q;
 BL.u = 'fr';
 BL.y = 'q1';
-BR = Q/Pc;
+BR = Q/Pc(1,1);
 BR.u = 'fk_fdbk';
 BR.y = 'q2';
 S3 = sumblk('dob=q2-q1');
@@ -75,7 +75,7 @@ DOB = tf(connect(BL,BR,S3,noise_block, inp_dob, out_dob));
 
 %% Combine Pc and DOB
 inp_sys = {'fd'; 'n'; 'd'};
-out_sys = {'fk'};
+out_sys = {'fk','i'};
 
 S4 = sumblk('fr=fd-dob');
 SYS = tf(connect(Pc_nd,DOB,S4,inp_sys,out_sys));
