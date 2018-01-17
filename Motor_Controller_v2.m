@@ -23,11 +23,10 @@ kd = (2*CL_damp_ratio*sqrt(mk*k*(1+beta*kp))-b_eff)/(k*beta);
 P = SEA;
 % Controller
 PD = tf([kd, kp],[1]);
-H = integralboost(293); % chosen b/c of Plant's natural frequency
-C = PD*H;
+%H = integralboost(293); % chosen b/c of Plant's natural frequency
+C = PD;
 % Feedforward
-%B = tf([1/beta],[1]);
-B = tf([0],[1]);
+B = tf([1/beta],[1]);
 
 [SYS, L, Gol, Pc, Pc_nd] = getModelTFs(P,C,B);
 [SYS_orig, L_orig, Gol_orig, Pc_orig, Pc_nd_orig] = getModelTFs(P,PD,B);
@@ -50,6 +49,7 @@ bodemag(L_orig,'b-', S_orig, 'g-',T_orig,'r-')
 legend('original L', 'original S', 'original T')
 title('Original Controller Bode Diagram')
 % Open loop characteristics
+
 c1_chars=assessL(L)
 c2_chars=assessL(L_orig)
 
