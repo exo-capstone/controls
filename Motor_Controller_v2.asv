@@ -1,4 +1,4 @@
-clear all; clc; close all;
+clear all; clc;
 load('SEA.mat');
 
 % % UT-SEA force control parameters
@@ -23,10 +23,11 @@ kd = (2*CL_damp_ratio*sqrt(mk*k*(1+beta*kp))-b_eff)/(k*beta);
 P = SEA;
 % Controller
 PD = tf([kd, kp],[1]);
-%H = integralboost(293); % chosen b/c of Plant's natural frequency
-C = PD;
+H = integralboost(293); % chosen b/c of Plant's natural frequency
+C = PD*H;
 % Feedforward
-B = tf([1/beta],[1]);
+%B = tf([1/beta],[1]);
+B = tf([0],[1]);
 
 [SYS, L, Gol, Pc, Pc_nd, DOB] = getModelTFs(P,C,B);
 [SYS_orig, L_orig, Gol_orig, Pc_orig, Pc_nd_orig, ~] = getModelTFs(P,PD,B);
@@ -49,7 +50,6 @@ bodemag(L_orig,'b-', S_orig, 'g-',T_orig,'r-')
 legend('original L', 'original S', 'original T')
 title('Original Controller Bode Diagram')
 % Open loop characteristics
-
 c1_chars=assessL(L)
 c2_chars=assessL(L_orig)
 
@@ -91,9 +91,4 @@ title('Original PD Controller')
 Ts = 1/1000; % assume sampling rate of 1 kHz
 % C_discrete = c2d(C,Ts);
 Q_discrete = c2d(DOB(1,1),Ts);
-PcInverseQ_discrete = c2d(DOB(1,2),Ts);
-PD_discrete = c2d(PD,Ts,'tustin');
-
-[Q_num, Q_den] = tfdata(Q_discrete);
-[PcQ_num, PcQ_den] = tfdata(PcInverseQ_discrete);
-[PD_num, PD_den] = tfdata(PD_discrete); 
+PcInverseQ_discrete = c2d(DOB(1,1),Ts);

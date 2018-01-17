@@ -1,4 +1,4 @@
-function [ SYS, L, Gol, Pc, Pc_nd, DOB] = getModelTFs(P, C, B)
+function [ SYS, L, Gol, Pc, Pc_nd ] = getModelTFs(P, C, B)
 % Uses model outlined in Nick Paine's thesis (below) to return the open 
 % loop, closed loop (ideal), closed loop (w/noise and dist), and closed 
 % loop w/DOB transfer functions given plant, controller, and feedforward TFs
@@ -32,7 +32,7 @@ B.y = 'frb';
 S1 = sumblk('e=fr');
 S2 = sumblk('i=u+frb');
 inp = {'fr'};
-outp = {'fk';'i'};
+outp = {'fk','i'};
 
 % Open loop transfer function without feed forward (just P and C)
 L = P*C;
@@ -62,11 +62,7 @@ Q = tf([1],[1/wn^2, 1.4142/wn, 1]);
 BL = Q;
 BL.u = 'fr';
 BL.y = 'q1';
-<<<<<<< HEAD
-BR = Q/Pc(1,1);
-=======
-BR = minreal(Q/Pc);
->>>>>>> d193c6fac89ca8f4efbde9121b608bf0f00ba5c7
+BR = Q/Pc;
 BR.u = 'fk_fdbk';
 BR.y = 'q2';
 S3 = sumblk('dob=q2-q1');
@@ -79,7 +75,7 @@ DOB = tf(connect(BL,BR,S3,noise_block, inp_dob, out_dob));
 
 %% Combine Pc and DOB
 inp_sys = {'fd'; 'n'; 'd'};
-out_sys = {'fk','i'};
+out_sys = {'fk'};
 
 S4 = sumblk('fr=fd-dob');
 SYS = tf(connect(Pc_nd,DOB,S4,inp_sys,out_sys));
