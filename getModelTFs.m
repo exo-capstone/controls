@@ -62,11 +62,10 @@ Q = tf([1],[1/wn^2, 1.4142/wn, 1]);
 BL = Q;
 BL.u = 'fr';
 BL.y = 'q1';
-<<<<<<< HEAD
-BR = Q/Pc(1,1);
-=======
-BR = minreal(Q/Pc);
->>>>>>> d193c6fac89ca8f4efbde9121b608bf0f00ba5c7
+%<<<<<<< HEAD
+%=======
+BR = minreal(Q/Pc(1,1));
+%>>>>>>> d193c6fac89ca8f4efbde9121b608bf0f00ba5c7
 BR.u = 'fk_fdbk';
 BR.y = 'q2';
 S3 = sumblk('dob=q2-q1');
@@ -79,10 +78,12 @@ DOB = tf(connect(BL,BR,S3,noise_block, inp_dob, out_dob));
 
 %% Combine Pc and DOB
 inp_sys = {'fd'; 'n'; 'd'};
-out_sys = {'fk','i'};
+out_sys = {'fk'};
 
 S4 = sumblk('fr=fd-dob');
 SYS = tf(connect(Pc_nd,DOB,S4,inp_sys,out_sys));
+SYS = minreal(SYS);
+
 end
 
 
