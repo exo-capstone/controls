@@ -24,12 +24,18 @@ P = SEA;
 % Controller
 PD = tf([kd, kp],[1]);
 %H = integralboost(293); % chosen b/c of Plant's natural frequency
+f_c = 100;
+f_sample = 1000;
+[b,a] = butter(2,f_c/(f_sample/2));
 C = PD;
 % Feedforward
 B = tf([1/beta],[1]);
 
-[SYS, L, Gol, Pc, Pc_nd, DOB] = getModelTFs(P,C,B);
+[SYS, L, Gol, Pc, Pc_nd, DOB] = getModelTFs_noFF(P,C);
 [SYS_orig, L_orig, Gol_orig, Pc_orig, Pc_nd_orig, ~] = getModelTFs(P,PD,B);
+
+SYS = minreal(SYS)
+L = minreal(L)
 
 %% Open Loop Analysis
 S = feedback([1],[L]);
