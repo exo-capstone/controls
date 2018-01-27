@@ -24,9 +24,6 @@ P = SEA;
 % Controller
 PD = tf([kd, kp],[1]);
 %H = integralboost(293); % chosen b/c of Plant's natural frequency
-f_c = 100;
-f_sample = 1000;
-[b,a] = butter(2,f_c/(f_sample/2));
 C = PD;
 % Feedforward
 B = tf([1/beta],[1]);
@@ -94,12 +91,22 @@ plot(t, Fk_orig, 'LineWidth',2);
 title('Original PD Controller')
 
 %% Convert from continuous to discrete time
-Ts = 1/1000; % assume sampling rate of 1 kHz
+Ts = 1/1000; %sampling rate of 1 kHz
 % C_discrete = c2d(C,Ts);
 Q_discrete = c2d(DOB(1,1),Ts);
 PcInverseQ_discrete = c2d(DOB(1,2),Ts);
 PD_discrete = c2d(PD,Ts,'tustin');
+P_discrete = c2d(P,Ts);
 
 [Q_num, Q_den] = tfdata(Q_discrete);
 [PcQ_num, PcQ_den] = tfdata(PcInverseQ_discrete);
 [PD_num, PD_den] = tfdata(PD_discrete); 
+
+%% Simulate DT system with filter
+f_c = 100;
+f_sample = 1000;
+[b,a] = butter(2,f_c/(f_sample/2));
+F = tf(b,a);
+F_discrete = c2d(F,Ts); 
+sys_dt = DTsim(P_discrete,PD_discrete,PcInverseQ_discrete,Q_discrete,F_discrete);
+step(sys_dt)
