@@ -2,12 +2,12 @@ function SYS = DTsim(P,PD,PinvQ,Q,F)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-%                                      d
-%                                      |
-%         s4        s5                  v
-% fd-->--+o--fr----+o--e---[ PD ]--i---o--id--[ F ]-idf-[ P ]--->fk
-%        -|      |  |-                 s2                   s3|   
-%         |      |  ------------------------------------------o<--n
+%                                               d
+%                                               |
+%         s4        s5                          v
+% fd-->--+o--fr----+o--e-[ F ]--ef--[ PD ]--i---o--id---------=-[ P ]--->fk
+%        -|      |  |-                 s2                           s3|   
+%         |      |  --------------------------------------------------o<--n
 %         |      |       frq  s1 fk_fdbk_pq               |fk_fdbk
 %         |      ---[ Q ]-----o----------[ P^-1*Q ]--------
 %         |                  -|+
@@ -16,14 +16,14 @@ function SYS = DTsim(P,PD,PinvQ,Q,F)
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Define Plant input/output
-P.u = 'idf';
+P.u = 'id';
 P.y = 'fk';
 % Define Controller input/output
-PD.u = 'e';
+PD.u = 'ef';
 PD.y = 'i';
 % Define Butterworth Filter input/output
-F.u = 'id';
-F.y = 'idf';
+F.u = 'e';
+F.y = 'ef';
 
 Q.u = 'fr';
 Q.y = 'frq';

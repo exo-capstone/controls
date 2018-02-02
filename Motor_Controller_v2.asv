@@ -109,18 +109,16 @@ P_discrete = c2d(P,Ts);
 
 %% Simulate DT system with filter
 
-f_c = 400;
+f_c = 250;
 f_sample = 1000;
 [b,a] = butter(2,f_c/(f_sample/2));
+%F = tf(b,a);
 F_discrete = tf(b,a,1/f_sample);
-% F_discrete = tf(1,1,1/f_sample);
+%F_discrete = c2d(F,Ts); 
 sys_dt = DTsim(P_discrete,PD_discrete,PcInverseQ_discrete,Q_discrete,F_discrete);
 
-t = 0:0.001:1;
-Fd_dt = ones(numel(t),1);
-noise_dt = 0.2*randn(numel(t),1);
-dist_dt = [zeros(500,1) ;ones(1,1); zeros(numel(t) - 501,1)];
-
 figure;
+step = ones(1,numel(t),1);
 % step(sys_dt(1,1))
-lsim(sys_dt, [Fd_dt,noise_dt, dist_dt], t);
+input = [];
+lsim(
