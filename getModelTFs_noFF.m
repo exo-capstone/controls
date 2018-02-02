@@ -1,4 +1,4 @@
-function [ SYS, L, Gol, Pc, Pc_nd, DOB] = getModelTFs_noFF(P, C)
+function [ SYS, L, Gol, Pc, Pc_nd, DOB, Q, PinvQ] = getModelTFs_noFF(P, C)
 % Uses model outlined in Nick Paine's thesis (below) to return the open 
 % loop, closed loop (ideal), closed loop (w/noise and dist), and closed 
 % loop w/DOB transfer functions given plant, controller, and feedforward TFs
@@ -58,23 +58,23 @@ Pc_nd = tf(connect(P,C,S1_nd, noise_block ,S2_nd, inp_nd, outp_nd));
 wn = max(damp(Pc)); % 293.3863
 Q = tf(1,[1/wn^2, 1.4142/wn, 1]);
 
-BL = Q;
-BL.u = 'fr';
-BL.y = 'q1';
+Q = Q;
+Q.u = 'fr';
+Q.y = 'q1';
 %<<<<<<< HEAD
 %=======
 %BR = minreal(Q/Pc(1,1));
-BR = Q/Pc(1,1);
+PinvQ = Q/Pc(1,1);
 %>>>>>>> d193c6fac89ca8f4efbde9121b608bf0f00ba5c7
-BR.u = 'fk_fdbk';
-BR.y = 'q2';
+PinvQ.u = 'fk_fdbk';
+PinvQ.y = 'q2';
 S3 = sumblk('dob=q2-q1');
 % noise_block accounts for 'fk_fdbk=fk+n'
 
 inp_dob = {'fr';'fk';'n'};
 out_dob = {'dob'};
 
-DOB = tf(connect(BL,BR,S3,noise_block, inp_dob, out_dob));
+DOB = tf(connect(Q,PinvQ,S3,noise_block, inp_dob, out_dob));
 
 %% Combine Pc and DOB
 inp_sys = {'fd'; 'n'; 'd'};
