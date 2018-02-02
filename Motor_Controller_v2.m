@@ -24,10 +24,10 @@ P = SEA;
 % Controller
 PD = tf([kd, kp],[1]);
 %H = integralboost(293); % chosen b/c of Plant's natural frequency
-<<<<<<< HEAD
+%<<<<<<< HEAD
 
-=======
->>>>>>> b9e4ed91f958a283236207df27da5b54bc828988
+%=======
+%>>>>>>> b9e4ed91f958a283236207df27da5b54bc828988
 C = PD;
 % Feedforward
 B = tf([1/beta],[1]);
@@ -106,25 +106,14 @@ P_discrete = c2d(P,Ts);
 [PcQ_num, PcQ_den] = tfdata(PcInverseQ_discrete);
 [PD_num, PD_den] = tfdata(PD_discrete); 
 
-<<<<<<< HEAD
-f_c = 100;
-f_sample = 1000;
-[b,a] = butter(2,f_c/(f_sample/2));
 
-butter_filt = tf(b,a,10^-3);
-PD_filtered = butter_filt*PD_discrete;
 
-figure
-step(PD_discrete)
-figure
-step(PD_filtered)
-=======
 %% Simulate DT system with filter
 f_c = 100;
 f_sample = 1000;
 [b,a] = butter(2,f_c/(f_sample/2));
 F = tf(b,a);
+F2 = tf(b,a,f_sample);
 F_discrete = c2d(F,Ts); 
 sys_dt = DTsim(P_discrete,PD_discrete,PcInverseQ_discrete,Q_discrete,F_discrete);
 step(sys_dt)
->>>>>>> b9e4ed91f958a283236207df27da5b54bc828988
