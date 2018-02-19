@@ -58,7 +58,7 @@ den = SEA.Denominator;
 mk = k / den(3);
 b_eff = mk * den(2);
 beta = (num * mk) / k;
-save('SEA.mat', 'SEA','b_eff', 'beta', 'k', 'mk','N','Fs','output','input');
+save('SEA.mat', 'SEA','SEA_2','b_eff', 'beta', 'k', 'mk','N','Fs','output','input');
 
 % Define frequency vector
 f = (0:N-1)*(Fs/N);
@@ -109,7 +109,13 @@ saveas(f2,'system_ID.png');
 figure
 opts = timeoptions;
 opts.Grid = 'on';
+hold on
 impulseplot(SEA,opts)
+impulseplot(SEA_2,opts)
+legend('SEA1','SEA2')
 
 figure 
 step(SEA)
+hold on
+step(SEA_2)
+legend('SEA1','SEA2')
