@@ -22,10 +22,22 @@ kd = (2*CL_damp_ratio*sqrt(mk*k*(1+beta*kp))-b_eff)/(k*beta);
 % Plant
 P = SEA;
 % Controller
-PD = tf([kd, kp],[1]);
+% PD = tf([kd, kp],[1]);
 %H = integralboost(293); % chosen b/c of Plant's natural frequency
+%% add filter
+PD = pid(0,0,0);
 
-C = PD;
+PD.Kp = kp;
+PD.Kd = kd;
+
+Kp = tf(PD.Kp,1);
+Kd = tf([PD.Kd,0],1);
+
+cutoff = 200;
+order = 1;
+Filtered_PD = Kp + Kd*butter_filter_tf(order,cutoff); 
+%%
+C = Filtered_PD;
 % Feedforward
 B = tf([1/beta],[1]);
 
@@ -59,7 +71,7 @@ c2_chars=assessL(L_orig)
 
 %% Create Noise/Disturbance
 % Create discrete time steps to apply noise and disturbance
-t = 0:.01:12;
+t = 0:.001:5;
 % noise in the feedback signal
 % noise = zeros(numel(t),1);
 noise = 0.1*randn(numel(t),1);
@@ -98,29 +110,26 @@ Ts = 1/1000; %sampling rate of 1 kHz
 % C_discrete = c2d(C,Ts);
 Q_discrete = c2d(Q,Ts);
 PcInverseQ_discrete = c2d(PinvQ,Ts);
-PD_discrete = c2d(PD,Ts,'tustin');
+C_discrete = c2d(C,Ts,'tustin');
 P_discrete = c2d(P,Ts);
 
 [Q_num, Q_den] = tfdata(Q_discrete);
 [PcQ_num, PcQ_den] = tfdata(PcInverseQ_discrete);
-[PD_num, PD_den] = tfdata(PD_discrete); 
+[PD_num, PD_den] = tfdata(C_discrete); 
 
 
 
 %% Simulate DT system with filter
 
-f_c = 400;
-f_sample = 1000;
-[b,a] = butter(2,f_c/(f_sample/2));
-F_discrete = tf(b,a,1/f_sample);
 % F_discrete = tf(1,1,1/f_sample);
-sys_dt = DTsim(P_discrete,PD_discrete,PcInverseQ_discrete,Q_discrete,F_discrete);
+sys_dt = DTsim(P_discrete,C_discrete,PcInverseQ_discrete,Q_discrete);
 
 t = 0:0.001:1;
 Fd_dt = ones(numel(t),1);
-noise_dt = 0.2*randn(numel(t),1);
+noise_dt = 0.1*randn(numel(t),1);
 dist_dt = [zeros(500,1) ;ones(1,1); zeros(numel(t) - 501,1)];
 
 figure;
 % step(sys_dt(1,1))
 lsim(sys_dt, [Fd_dt,noise_dt, dist_dt], t);
+legend('reference', 'noise', 'disturbance', 'output');
